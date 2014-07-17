@@ -45,7 +45,8 @@ var list_options = {
 
 var downloadUrl_options = {
 	hostname : 'www.save.tv',
-	path : 'https://www.save.tv/STV/M/obj/cRecordOrder/croGetDownloadUrl.cfm',
+	path_base : 'https://www.save.tv/STV/M/obj/cRecordOrder/croGetDownloadUrl.cfm',
+	path : '',
 	headers : { 'Accept' : '*/*',
                 'Cookie' : ''
 	}
@@ -61,7 +62,8 @@ var logout_options = {
 
 var delete_options  = {
 	hostname : 'www.save.tv',
-	path : 'https://www.save.tv/STV/M/obj/cRecordOrder/croDelete.cfm',
+	path_base : 'https://www.save.tv/STV/M/obj/cRecordOrder/croDelete.cfm',
+	path : '',
 	headers : { 'Accept' : '*/*',
                 'Cookie' : ''
 	}
@@ -93,8 +95,8 @@ function download_file_wget(file_url, file_name, callback) {
 
 function download_recording(recording, callback){
 
-    downloadUrl_options.path = 'https://www.save.tv/STV/M/obj/cRecordOrder/croGetDownloadUrl.cfm?TelecastId=' + recording.ITELECASTID + 
-                      '&iFormat=5.0&bAdFree=true';
+    downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId=' 
+         + recording.ITELECASTID + '&iFormat=5.0&bAdFree=true';
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){
@@ -119,8 +121,12 @@ function download_recording(recording, callback){
 	            	    db.insert(recording, function(err, newRecording){});
 
                     	if(DEL_REC_AFTER_DOWNLOAD){
-                    		delete_options.path =  'https://www.save.tv/STV/M/obj/cRecordOrder/croDelete.cfm?TelecastID=' + recording.ITELECASTID;
-                    		var delete_request = https.request(delete_options, function(res){ }).end();
+                    		delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
+                    		var delete_request = https.request(delete_options, function(res){ 
+                                  res.on('end', function(){
+                                  	console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
+                                  })
+                    		}).end();
                     	}
                     }
 
