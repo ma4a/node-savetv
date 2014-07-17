@@ -39,7 +39,7 @@ var list_options = {
 	hostname : 'www.save.tv',
 	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm',
 	headers : { 'Accept' : '*/*',
-                'Cookie' : cookie
+                'Cookie' : ''
 	}
 }
 
@@ -47,7 +47,7 @@ var downloadUrl_options = {
 	hostname : 'www.save.tv',
 	path : 'https://www.save.tv/STV/M/obj/cRecordOrder/croGetDownloadUrl.cfm',
 	headers : { 'Accept' : '*/*',
-                'Cookie' : cookie
+                'Cookie' : ''
 	}
 }
 
@@ -55,7 +55,7 @@ var logout_options = {
 	hostname : 'www.save.tv',
 	path : 'https://www.save.tv/STV/M/obj/user/usLogout.cfm',
 	headers : { 'Accept' : '*/*',
-                'Cookie' : cookie
+                'Cookie' : ''
 	}
 }
 
@@ -63,7 +63,7 @@ var delete_options  = {
 	hostname : 'www.save.tv',
 	path : 'https://www.save.tv/STV/M/obj/cRecordOrder/croDelete.cfm',
 	headers : { 'Accept' : '*/*',
-                'Cookie' : cookie
+                'Cookie' : ''
 	}
 }
 
