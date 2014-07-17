@@ -9,7 +9,9 @@ var Datastore = require('nedb'), db = new Datastore({
  * constants that need adjustment based on save.tv user
  * preferences.
  */
-var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. please end with delimiter
+var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. 
+                                     // please end with delimiter and create directory before
+                                     // first use. the script will otherwise error
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
 var USERNAME = <Username>; // save.tv username
 var PASSWORD = <Password>; // save.tv password
@@ -58,7 +60,7 @@ var logout_options = {
 	}
 }
 
-
+// crate wget child process to download the recording
 function download_file_wget(file_url, file_name, callback) {
 
 	var wget_options = { 
@@ -81,7 +83,7 @@ function download_file_wget(file_url, file_name, callback) {
 };
 
 
-
+// retreive the url from where to download the recording and initiate the downlod
 function download_recording(recording, callback){
 
     downloadUrl_options.path = 'https://www.save.tv/STV/M/obj/cRecordOrder/croGetDownloadUrl.cfm?TelecastId=' + recording.ITELECASTID + 
@@ -120,6 +122,7 @@ function download_recording(recording, callback){
     downloadUrl_req.end();
 }
 
+// callback function for retreiveing the list of recordings and queue them up
 list_callback = function(res){
 
     var list = '';
@@ -149,6 +152,7 @@ list_callback = function(res){
     });
 }
 
+// callback function for logon to save.tv
 logon_callback = function(res){
 
 	res.setEncoding('utf8');
