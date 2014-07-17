@@ -110,6 +110,8 @@ function download_recording(recording, callback){
 
 		res.on('end', function(){
 
+			console.log(list);
+
 	        var obj = JSON.parse(list);
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
                
@@ -121,11 +123,20 @@ function download_recording(recording, callback){
 	            	    db.insert(recording, function(err, newRecording){});
 
                     	if(DEL_REC_AFTER_DOWNLOAD){
+                    		
                     		delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
                     		var delete_request = https.request(delete_options, function(res){ 
+                    			
+                    			  var body = '';
+
+                    		      res.on('data', function(chunk){
+                    		      	body += chunk;
+                    		      }) 
+
                                   res.on('end', function(){
                                   	console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
-                                  })
+                                  });
+
                     		}).end();
                     	}
                     }
@@ -154,9 +165,10 @@ list_callback = function(res){
 
     res.on('end', function(){
 
-	 	var obj = JSON.parse(list); 	
+	 	var obj = JSON.parse(list); 
 
-    	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(recording){
+    	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
+    		  var recording = telecast.STRTELECASTENTRY;
 
         	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
 	        	  	if (doc === null){
