@@ -9,15 +9,16 @@ var Datastore = require('nedb'), db = new Datastore({
  * constants that need adjustment based on save.tv user
  * preferences.
  */
-var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. please end with delimiter
+var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. directory has to exist
+                                     // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
-var USERNAME = <Username>; // save.tv username
-var PASSWORD = <Password>; // save.tv password
-var DEL_REC_AFTER_DOWNLOAD = true;
+var USERNAME = '179645'; // save.tv username
+var PASSWORD = '231FE44A'; // save.tv password
+var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
+var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
 
 // parameters to be implement in the future
-// var ADDFREE = true, false;
-// var RECORDING_VERSIONS = ['standard', 'hd', 'mobile'];
+// var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 
 var post_data = qs.stringify({
 	 sUsername : USERNAME,
@@ -80,7 +81,7 @@ function download_file_wget(file_url, file_name, callback) {
     // compose the wget command
     var wget = 'wget -c -O "' + file_name + '" ' + file_url;
 
-    console.log('Downloading %s from %s', file_name, file_url);
+    console.log('Downloading to %s from %s', file_name, file_url);
     
     // excute wget using child_process' exec function
     exec(wget, { encoding: 'binary',
@@ -96,7 +97,7 @@ function download_file_wget(file_url, file_name, callback) {
 function download_recording(recording, callback){
 
     downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId=' 
-         + recording.ITELECASTID + '&iFormat=5.0&bAdFree=true';
+         + recording.ITELECASTID + '&iFormat=6.0&bAdFree=' + ADDFREE;
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){
@@ -109,8 +110,6 @@ function download_recording(recording, callback){
 		});
 
 		res.on('end', function(){
-
-			console.log(list);
 
 	        var obj = JSON.parse(list);
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
@@ -168,6 +167,7 @@ list_callback = function(res){
 	 	var obj = JSON.parse(list); 
 
     	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
+    		  
     		  var recording = telecast.STRTELECASTENTRY;
 
         	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
