@@ -16,6 +16,7 @@ var USERNAME = <USERNAME>; // save.tv username
 var PASSWORD = <PASSWORD>; // save.tv password
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
+var RECORDING_FORMAT = 6 // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd 
 
 // parameters to be implement in the future
 // var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
@@ -97,7 +98,7 @@ function download_file_wget(file_url, file_name, callback) {
 function download_recording(recording, callback){
 
     downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId=' 
-         + recording.ITELECASTID + '&iFormat=6.0&bAdFree=' + ADDFREE;
+         + recording.ITELECASTID + '&iFormat=' + RECORDING_FORMAT + '.0&bAdFree=' + ADDFREE;
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){
