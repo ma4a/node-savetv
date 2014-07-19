@@ -186,22 +186,23 @@ list_callback = function(res){
 
 logon_callback = function(res){
 
-	res.setEncoding('utf8');
+    var body = '';
+    res.setEncoding('utf8');
  	 
- 	res.on('data', function(body){
-    	if(body.indexOf('Login_Succeed') > -1){
-        	console.log('Login to www.save.tv successful');
-        	downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
+    res.on('data', function(chunk){
+	body += chunk;
+    });
+
+    res.on('end', function(body){
+        if(body.indexOf('Login_Succeed') > -1){
+          console.log('Login to www.save.tv successful');
+          downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
              = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
+	  var list_req = https.request(list_options, list_callback).end(); 
     	} else {
     		console.log('Login to www.save.tv failed');
     	}
- 	});
-
- 	res.on('end', function(body){
- 	   var list_req = https.request(list_options, list_callback).end(); 
     });
-
 }
 
 // create a queue to download recordings simultanously and queue the rest
