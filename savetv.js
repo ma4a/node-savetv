@@ -187,14 +187,9 @@ list_callback = function(res){
 
 logon_callback = function(res){
 
-    var body = '';
     res.setEncoding('utf8');
  	 
-    res.on('data', function(chunk){
-	body += chunk;
-    });
-
-    res.on('end', function(body){
+    res.on('data', function(body){
         if(body.indexOf('Login_Succeed') > -1){
           console.log('Login to www.save.tv successful');
           downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
@@ -204,6 +199,7 @@ logon_callback = function(res){
     		console.log('Login to www.save.tv failed');
     	}
     });
+
 }
 
 // create a queue to download recordings simultanously and queue the rest
