@@ -12,8 +12,8 @@ var Datastore = require('nedb'), db = new Datastore({
 var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. directory has to exist
                                      // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
-var USERNAME = '179645'; // save.tv username
-var PASSWORD = '231FE44A'; // save.tv password
+var USERNAME = '<username>'; // save.tv username
+var PASSWORD = '<password>'; // save.tv password
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
 
@@ -170,15 +170,21 @@ list_callback = function(res){
     		  
     		  var recording = telecast.STRTELECASTENTRY;
 
-        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
-	        	  	if (doc === null){
-	        	  		// push the recording into the download queue
-                        queue.push(recording);
-	        	  		console.log('Found new recording - %s - %s', recording.STITLE, recording.SSUBTITLE);
-	        	  	} else {
-	        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
-	        	  	}
-        	  });
+    		  try {
+
+	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
+		        	  	if (doc === null){
+		        	  		// push the recording into the download queue
+	                        queue.push(recording);
+		        	  		console.log('Found new recording - %s - %s', recording.STITLE, recording.SSUBTITLE);
+		        	  	} else {
+		        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
+		        	  	}
+	        	  });
+	        	  
+	          } catch (e){
+	          	  console.log(e);
+	          }
         });
 
     });
