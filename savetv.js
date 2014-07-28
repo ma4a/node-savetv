@@ -12,10 +12,11 @@ var Datastore = require('nedb'), db = new Datastore({
 var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. directory has to exist
                                      // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
-var USERNAME = '<username>'; // save.tv username
-var PASSWORD = '<password>'; // save.tv password
+var USERNAME = <USERNAME>; // save.tv username
+var PASSWORD = <PASSWORD>; // save.tv password
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
+var RECORDING_FORMAT = 6 // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd 
 
 // parameters to be implement in the future
 // var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
@@ -97,7 +98,7 @@ function download_file_wget(file_url, file_name, callback) {
 function download_recording(recording, callback){
 
     downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId=' 
-         + recording.ITELECASTID + '&iFormat=6.0&bAdFree=' + ADDFREE;
+         + recording.ITELECASTID + '&iFormat=' + RECORDING_FORMAT + '.0&bAdFree=' + ADDFREE;
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){
@@ -192,20 +193,17 @@ list_callback = function(res){
 
 logon_callback = function(res){
 
-	res.setEncoding('utf8');
+    res.setEncoding('utf8');
  	 
- 	res.on('data', function(body){
-    	if(body.indexOf('Login_Succeed') > -1){
-        	console.log('Login to www.save.tv successful');
-        	downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
+    res.on('data', function(body){
+        if(body.indexOf('Login_Succeed') > -1){
+          console.log('Login to www.save.tv successful');
+          downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
              = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
+	  var list_req = https.request(list_options, list_callback).end(); 
     	} else {
     		console.log('Login to www.save.tv failed');
     	}
- 	});
-
- 	res.on('end', function(body){
- 	   var list_req = https.request(list_options, list_callback).end(); 
     });
 
 }
