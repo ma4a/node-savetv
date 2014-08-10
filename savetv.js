@@ -39,7 +39,7 @@ var logon_options = {
 
 var list_options = {
 	hostname : 'www.save.tv',
-	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm',
+	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm?bAggregateEntries=false',
 	headers : { 'Accept' : '*/*',
                 'Cookie' : ''
 	}
@@ -168,10 +168,10 @@ list_callback = function(res){
 	 	var obj = JSON.parse(list); 
 
     	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
-    		  
-    		  var recording = telecast.STRTELECASTENTRY;
 
-    		  try {
+    		  if(telecast.BISGROUP === false){}
+    		  
+    		      var recording = telecast.STRTELECASTENTRY;
 
 	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
 		        	  	if (doc === null){
@@ -182,10 +182,8 @@ list_callback = function(res){
 		        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
 		        	  	}
 	        	  });
-	        	  
-	          } catch (e){
-	          	  console.log(e);
-	          }
+	           }  
+
         });
 
     });
