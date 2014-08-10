@@ -116,7 +116,7 @@ function download_recording(recording, callback){
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
                
 	            downloadUrl = obj.ARRVIDEOURL[2];
-	            var file_name = DOWNLOAD_DIR + recording.STITLE + '-' + recording.SSUBTITLE + '.mp4';
+	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
 	            download_file_wget(downloadUrl, file_name , function(err) {
 	            	if(err) console.log('An error occured during download ', err);
 	            	else {
