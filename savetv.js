@@ -44,7 +44,11 @@ var logon_options = {
 
 var list_options = {
 	hostname : 'www.save.tv',
+<<<<<<< HEAD
 	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm?bAggregateEntries=false&iEntriesPerPage=100000&iRecordingState=1',
+=======
+	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm?bAggregateEntries=false',
+>>>>>>> 8e970093c7577409d3b667cb4e522a44dbffc4f7
 	headers : { 'Accept' : '*/*',
                 'Cookie' : ''
 	}
@@ -122,6 +126,7 @@ function download_recording(recording, callback){
                
 	            downloadUrl = obj.ARRVIDEOURL[2];
 	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
+<<<<<<< HEAD
 				// add a check if the file already exists then most likely there are two recordings of the same show on save.tv
 				// and another thread is downloading the fist one. hence we skip downloading that file
 				if (!fs.existsSync(file_name)){
@@ -152,6 +157,34 @@ function download_recording(recording, callback){
 					    callback();
 					});
 				}
+=======
+	            download_file_wget(downloadUrl, file_name , function(err) {
+	            	if(err) console.log('An error occured during download ', err);
+	            	else {
+	            	    db.insert(recording, function(err, newRecording){});
+
+                    	if(DEL_REC_AFTER_DOWNLOAD){
+                    		
+                    		delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
+                    		var delete_request = https.request(delete_options, function(res){ 
+                    			
+                    			  var body = '';
+
+                    		      res.on('data', function(chunk){
+                    		      	body += chunk;
+                    		      }) 
+
+                                  res.on('end', function(){
+                                  	console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
+                                  });
+
+                    		}).end();
+                    	}
+                    }
+
+	            	callback();
+	            });
+>>>>>>> 8e970093c7577409d3b667cb4e522a44dbffc4f7
 
 	        } else {
 	        	console.log('Error when trying to get the url to the recording %s. The error was: %s', obj.ARRVIDEOURL[0], obj.ARRVIDEOURL[2] );
@@ -177,9 +210,15 @@ list_callback = function(res){
 	 	var obj = JSON.parse(list);
 
     	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
+<<<<<<< HEAD
 			  
 			  if(telecast.BISGROUP === false){
 			  
+=======
+
+    		  if(telecast.BISGROUP === false){}
+    		  
+>>>>>>> 8e970093c7577409d3b667cb4e522a44dbffc4f7
     		      var recording = telecast.STRTELECASTENTRY;
 
 	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
@@ -191,9 +230,14 @@ list_callback = function(res){
 		        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
 		        	  	}
 	        	  });
+<<<<<<< HEAD
 			   } else {
 			      console.log('Found subgrup with name %s.', telecast.STITLE); 
 			   }
+=======
+	           }  
+
+>>>>>>> 8e970093c7577409d3b667cb4e522a44dbffc4f7
         });
 
     });
