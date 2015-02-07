@@ -5,15 +5,16 @@
   "main": "savetv.js",
   "dependencies": {
     "async": "~0.9.0",
-    "nedb": "~0.10.6"
+    "nedb": "~0.10.6",
+    "stdio": "^0.2.7"
   },
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-  "type": "git",
-  "url": "git://github.com/IngoS11/node-savetv.git"
+    "type": "git",
+    "url": "git://github.com/IngoS11/node-savetv.git"
   },
   "keywords": [
     "www.save.tv",

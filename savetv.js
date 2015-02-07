@@ -2,6 +2,7 @@ var https = require('https');
 var qs = require('querystring');
 var async = require('async');
 var exec = require('child_process').exec;
+var fs = require('fs');
 var Datastore = require('nedb'), db = new Datastore({
 	filename : './savetv.db', autoload : true}); 
 
@@ -9,11 +10,9 @@ var Datastore = require('nedb'), db = new Datastore({
  * constants that need adjustment based on save.tv user
  * preferences.
  */
-var DOWNLOAD_DIR = './downloads/';   // directory to download the files to. directory has to exist
+var DOWNLOAD_DIR = 'D:\\Downloads\\SaveTV\\';   // directory to download the files to. directory has to exist
                                      // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
-var USERNAME = <USERNAME>; // save.tv username
-var PASSWORD = <PASSWORD>; // save.tv password
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
 var RECORDING_FORMAT = 6 // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd 
@@ -21,9 +20,15 @@ var RECORDING_FORMAT = 6 // select the recording format to download. Current opt
 // parameters to be implement in the future
 // var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 
+var stdio = require('stdio');
+var ops = stdio.getopt({
+	'username': {key: 'u', args: 1, mandatory: true, description: 'save.tv username'},
+	'password': {key: 'p', args: 1, mandatory: true, description: 'save.tv password'}
+});
+
 var post_data = qs.stringify({
-	 sUsername : USERNAME,
-	 sPassword : PASSWORD,
+	 sUsername : ops.username,
+	 sPassword : ops.password,
 	 value : 'Login'
 });
 
@@ -39,7 +44,7 @@ var logon_options = {
 
 var list_options = {
 	hostname : 'www.save.tv',
-	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm',
+	path : '/STV/M/obj/archive/JSON/VideoArchiveApi.cfm?bAggregateEntries=false&iEntriesPerPage=100000&iRecordingState=1',
 	headers : { 'Accept' : '*/*',
                 'Cookie' : ''
 	}
@@ -116,33 +121,37 @@ function download_recording(recording, callback){
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
                
 	            downloadUrl = obj.ARRVIDEOURL[2];
-	            var file_name = DOWNLOAD_DIR + recording.STITLE + '-' + recording.SSUBTITLE + '.mp4';
-	            download_file_wget(downloadUrl, file_name , function(err) {
-	            	if(err) console.log('An error occured during download ', err);
-	            	else {
-	            	    db.insert(recording, function(err, newRecording){});
+	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
+				// add a check if the file already exists then most likely there are two recordings of the same show on save.tv
+				// and another thread is downloading the fist one. hence we skip downloading that file
+				if (!fs.existsSync(file_name)){
+				
+					download_file_wget(downloadUrl, file_name , function(err) {
+						if(err) console.log('An error occured during download ', err);
+						else {
+							db.insert(recording, function(err, newRecording){});
 
-                    	if(DEL_REC_AFTER_DOWNLOAD){
-                    		
-                    		delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
-                    		var delete_request = https.request(delete_options, function(res){ 
-                    			
-                    			  var body = '';
+							if(DEL_REC_AFTER_DOWNLOAD){
+								
+								delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
+								var delete_request = https.request(delete_options, function(res){ 
+									
+									  var body = '';
 
-                    		      res.on('data', function(chunk){
-                    		      	body += chunk;
-                    		      }) 
+									  res.on('data', function(chunk){
+										body += chunk;
+									  }) 
 
-                                  res.on('end', function(){
-                                  	console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
-                                  });
+									  res.on('end', function(){
+										console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
+									  });
 
-                    		}).end();
-                    	}
-                    }
-
-	            	callback();
-	            });
+								}).end();
+							}
+						}
+					    callback();
+					});
+				}
 
 	        } else {
 	        	console.log('Error when trying to get the url to the recording %s. The error was: %s', obj.ARRVIDEOURL[0], obj.ARRVIDEOURL[2] );
@@ -165,13 +174,13 @@ list_callback = function(res){
 
     res.on('end', function(){
 
-	 	var obj = JSON.parse(list); 
+	 	var obj = JSON.parse(list);
 
     	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
-    		  
-    		  var recording = telecast.STRTELECASTENTRY;
-
-    		  try {
+			  
+			  if(telecast.BISGROUP === false){
+			  
+    		      var recording = telecast.STRTELECASTENTRY;
 
 	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
 		        	  	if (doc === null){
@@ -182,10 +191,9 @@ list_callback = function(res){
 		        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
 		        	  	}
 	        	  });
-	        	  
-	          } catch (e){
-	          	  console.log(e);
-	          }
+			   } else {
+			      console.log('Found subgrup with name %s.', telecast.STITLE); 
+			   }
         });
 
     });
@@ -208,7 +216,7 @@ logon_callback = function(res){
 
 }
 
-// create a queue to download recordings simultanously and queue the rest
+// create a queue to download recordings simultaneously and queue the rest
 var queue = async.queue(download_recording, SIMULTANOUS_DOWNLOADS);
 
 queue.drain = function(){
