@@ -138,11 +138,14 @@ fs.readdir(CHECK_DIR, function(err, files){
 		var filename = files[i];
 	    if(filename.indexOf("mp4") > -1){ 
 			var fsplit = filename.split("-");
-		    var item = { title: fsplit[0].split("#")[0].trim(), subtitle: fsplit[2].split(".")[0].trim() } ;	
+			if(fsplit[1].indexOf("mp4") > -1)
+			    var subtitle = fsplit[1].split(".")[0].trim();
+			else
+				var subtitle = fsplit[2].split(".")[0].trim();
+		    var item = { title: fsplit[0].split("#")[0].trim(), subtitle: subtitle } ;	
 			name_list.push(item);
 		}
 	}
-	
 	var logon_req = https.request(logon_options, logon_callback)
 	logon_req.write(post_data);
 	logon_req.end();
