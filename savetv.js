@@ -11,7 +11,7 @@ var Datastore = require('nedb'), db = new Datastore({
  * preferences.
  */
 var DOWNLOAD_DIR = 'D:\\Downloads\\SaveTV\\';   // directory to download the files to. directory has to exist
-                                     // as otherwies the script will break
+                                                // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
@@ -23,8 +23,12 @@ var RECORDING_FORMAT = 6 // select the recording format to download. Current opt
 var stdio = require('stdio');
 var ops = stdio.getopt({
 	'username': {key: 'u', args: 1, mandatory: true, description: 'save.tv username'},
-	'password': {key: 'p', args: 1, mandatory: true, description: 'save.tv password'}
+	'password': {key: 'p', args: 1, mandatory: true, description: 'save.tv password'},
+	'downloadto' : {key: 'd', args: 1, description: 'save downloads to directory'}
 });
+// if download directory was specified via command line parameter overwrite default
+if(ops.downloadto)
+	DOWNLOAD_DIR = ops.downloadto
 
 var post_data = qs.stringify({
 	 sUsername : ops.username,
@@ -216,7 +220,8 @@ logon_callback = function(res){
 
 }
 
-// create a queue to download recordings simultaneously and queue the rest
+// create a queue to download recordings simultaneously and queue the rest. The number of
+// simultaneous recordings is specified with constant SIMULTANOUS_DOWNLOADS
 var queue = async.queue(download_recording, SIMULTANOUS_DOWNLOADS);
 
 queue.drain = function(){

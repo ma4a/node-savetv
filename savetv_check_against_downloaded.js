@@ -1,11 +1,19 @@
+var fs = require('fs')
+var CHECK_DIR = ".";
+var name_list = [];
 var https = require('https');
 var qs = require('querystring');
-var name_list = [];
 
+// parameters to be implement in the future
+// var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
+var stdio = require('stdio');
 var ops = stdio.getopt({
 	'username': {key: 'u', args: 1, mandatory: true, description: 'save.tv username'},
-	'password': {key: 'p', args: 1, mandatory: true, description: 'save.tv password'}
+	'password': {key: 'p', args: 1, mandatory: true, description: 'save.tv password'},
+	'directory' : {key: 'd', args: 1, description: 'Search directory'}
 });
+if(ops.directory)
+	CHECK_DIR = ops.directory
 
 var post_data = qs.stringify({
 	 sUsername : ops.username,
@@ -75,11 +83,14 @@ list_callback = function(res){
 			  if(telecast.BISGROUP === false){
 			  
     		      var recording = telecast.STRTELECASTENTRY;
-				  title_subtitle = recording.STITLE + " " + recording.SSUBTITLE;
-				  if(name_list.indexOf(title_subtitle) === -1){
-					  name_list.push(title_subtitle);
-					  console.log('New recording, %s - %s', recording.STITLE, recording.SSUBTITLE);
-				  } else {
+				  var arrayFound = name_list.filter(function(item){
+					  if(item.title === recording.STITLE.trim() && item.subtitle === recording.SSUBTITLE.trim()){
+						return item;
+					  }
+				  });
+				  
+				  // if we found the recording in the list of files read from the directory we delete it on save.tv
+				  if(arrayFound.length > 0){
 					  delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
 					  var delete_request = https.request(delete_options, function(res){ 
 									
@@ -95,7 +106,7 @@ list_callback = function(res){
 					
 					}).end();
 				  }  
-				  
+
 			   } else {
 			      console.log('Found subgrup with name %s.', telecast.STITLE); 
 			   }
@@ -113,15 +124,26 @@ logon_callback = function(res){
           console.log('Login to www.save.tv successful');
           downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
              = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
-	  var list_req = https.request(list_options, list_callback).end(); 
+			var list_req = https.request(list_options, list_callback).end(); 
     	} else {
     		console.log('Login to www.save.tv failed');
     	}
     });
-
 }
 
-var logon_req = https.request(logon_options, logon_callback)
-logon_req.write(post_data);
-logon_req.end();
+fs.readdir(CHECK_DIR, function(err, files){
+	for(var i = 0; i < files.length; i++){
+		var filename = files[i];
+	    if(filename.indexOf("mp4") > -1){ 
+			var fsplit = filename.split("-");
+		    var item = { title: fsplit[0].split("#")[0].trim(), subtitle: fsplit[2].split(".")[0].trim() } ;	
+			name_list.push(item);
+		}
+	}
+	
+	var logon_req = https.request(logon_options, logon_callback)
+	logon_req.write(post_data);
+	logon_req.end();
+	
+});
 
