@@ -105,7 +105,9 @@ list_callback = function(res){
 						 });
 					
 					}).end();
-				  }  
+				  }  else {
+				  		 console.log("Recording %s - %s is new", recording.STITLE, recording.SSUBTITLE);
+				  }
 
 			   } else {
 			      console.log('Found subgrup with name %s.', telecast.STITLE); 
