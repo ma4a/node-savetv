@@ -4,7 +4,7 @@ A set of node.js scripts to download recordings from www.save.tv
 Prerequisites
 -------------
 
-The download script depends on the existance of wget. You can get a version of wget for Windows from http://gnuwin32.sourceforge.net/packages/wget.htm. A version for the Mac from http://osxdaily.com/2012/05/22/install-wget-mac-os-x/. Linux wget is typically installed with the base OS. We have tried the two wgets but typically any wget should do the trick.
+The download script depends on the existance of wget. You can get a version of wget for Windows from http://gnuwin32.sourceforge.net/packages/wget.htm. A version for the Mac from http://osxdaily.com/2012/05/22/install-wget-mac-os-x/. Linux wget is typically installed with the base OS. We have tried the two wgets but typically any wget should do the trick. Make sure that once installed the path wget resides in is part of the PATH variable and can be seen on the comand line without specifying the path.
 
 Installation
 ------------
