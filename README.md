@@ -1,8 +1,6 @@
 A set of node.js scripts to download recordings from www.save.tv
 ================================================================
 
-The toolset can be used to managed and download recordings from www.save.tv. 
-
 Prerequisites
 -------------
 
