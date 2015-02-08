@@ -3,6 +3,7 @@ A set of node.js scripts to download recordings from www.save.tv
 
 This is a toolset that allows you to manage and download recordings from the Germany TV Website www.save.tv. In order to use the tools you have to have a paid account on the website. The toolset is only tested with a premium account where you can record in h.264 format. If you only have a standard account with avi recordings your milage may vary. Feel free to send me a message in case you have an avi only account so we can make the necessary adjustments for avi to work. 
 
+
 Prerequisites
 -------------
 
