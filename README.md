@@ -18,10 +18,11 @@ this will read package.json and get the required dependencies from the npm repos
 
 Getting started
 ---------------
-Download recordings:
+Download recordings to a specified directory. you can maniplulate the type to download inside the file by changing the parameter RECORDING_FORMAT. 6 = HD, 5 = h.264 High Quality, 4 = h.264 Mobile. 
 ```
-node savetv.js -u <savetv_user> -p <savetv_password> -d <directory_to_save_files_to>
+node savetv.js -u <savetv_user> -p <savetv_password>  [ -d <directory_to_save_files_to> ]
 ```
+-d is optional. If you do not specify the directory the directory you are currently in is used. If you specify a directory make sure this directory exists. The tool will not creat it automatically.
 
 Delete duplicates on www.save.tv. This tool can be used to check for duplicates. This typically
 happens when you have scheduled recordings via the Channels functionality and a recording is aired multiple time on the same or on various channels.

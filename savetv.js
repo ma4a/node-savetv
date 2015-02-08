@@ -10,13 +10,12 @@ var Datastore = require('nedb'), db = new Datastore({
  * constants that need adjustment based on save.tv user
  * preferences.
  */
-var DOWNLOAD_DIR = 'D:\\Downloads\\SaveTV\\';   // directory to download the files to. directory has to exist
+var DOWNLOAD_DIR = '.';   // directory to download the files to. directory has to exist
                                                 // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
 var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
 var RECORDING_FORMAT = 6 // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd 
-
 // parameters to be implement in the future
 // var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 
