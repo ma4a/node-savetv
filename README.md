@@ -18,17 +18,17 @@ Getting started
 ---------------
 Download recordings to a specified directory. you can manipulate the type to download inside the file by changing the parameter RECORDING_FORMAT. 6 = HD, 5 = h.264 High Quality, 4 = h.264 Mobile. 
 ```
-node savetv.js -u <savetv_user> -p <savetv_password>  [ -d <directory_to_save_files_to> ]
+node savetv.js -u <username> -p <password>  [ -d <directory_to_save_files_to> ]
 ```
 -d is optional. If you do not specify the directory the directory you are currently in is used. If you specify a directory make sure this directory exists. The tool will not create it automatically.
 
 Delete duplicates on www.save.tv. This tool can be used to check for duplicates. This typically happens when you have scheduled recordings via the Channels functionality and a recording is aired multiple time on the same or on various channels.
 ```
-node savetv_delete_duplicates.js -u <savetv_user> -p <savetv_password> 
+node savetv_delete_duplicates.js -u <username> -p <password> 
 ```
 Delete the recordings that you have previously downloaded and still on your hard drive. This can be used to build a library over time and prevent previously downloaded recordings from being recorded again. This tool depends on a specific file name being present. Right now Title - Subtitle.mp4 is the expected file naming convention.
 ```
-node savetv_check_against_downloaded.js -u <savetv_user> -p <savetv_password> -d <directory_to_search>
+node savetv_check_against_downloaded.js -u <username> -p <password> -d <directory_to_search>
 ```
 
 
