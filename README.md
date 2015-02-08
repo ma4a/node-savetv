@@ -21,7 +21,8 @@ Getting started
 Download recordings to a specified directory. you can manipulate the behaviour of the script with the following parameters by changing them inside the sript near the top.
 
 | Parameter | Default | Description |
-| RECORDING_FORMAT | 6 |changes what format should be downloaded. valid parameters are: 6 = HD, 5 = h.264 High Quality, 4 = h.264 Mobile. Set by default to HD.|
+| ------------- | ------------- |
+| RECORDING_FORMAT | 6 | changes what format should be downloaded. valid parameters are: 6 = HD, 5 = h.264 High Quality, 4 = h.264 Mobile|
 | DEL_REC_AFTER_DOWNLOAD | true | deletes the recording on save.tv after successfull download |
 | ADDFREE | true | download the add free version of a file. if there is no add free version skip the download | 
 
