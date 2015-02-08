@@ -18,7 +18,11 @@ this will read package.json and get the required dependencies from the npm repos
 
 Getting started
 ---------------
-Download recordings to a specified directory. you can manipulate the behaviour of the script with the following parameters by changing them inside the sript near the top.
+Download recordings to a specified directory. 
+```
+node savetv.js -u <username> -p <password>  [ -d <directory_to_save_files_to> ]
+```
+-d is optional. If you do not specify the directory the directory you are currently in is used. If you specify a directory make sure this directory exists. The tool will not create it automatically. You can manipulate the behaviour of the script with the following parameters by changing them inside the sript near the top.
 
 | Parameter | Default | Description |
 | ------------- | ------------- |------------- |
@@ -26,10 +30,7 @@ Download recordings to a specified directory. you can manipulate the behaviour o
 | DEL_REC_AFTER_DOWNLOAD | true | deletes the recording on save.tv after successfull download |
 | ADDFREE | true | download the add free version of a file. if there is no add free version skip the download | 
 
-```
-node savetv.js -u <username> -p <password>  [ -d <directory_to_save_files_to> ]
-```
--d is optional. If you do not specify the directory the directory you are currently in is used. If you specify a directory make sure this directory exists. The tool will not create it automatically.
+
 
 Delete duplicates on www.save.tv. This tool can be used to check for duplicates. This typically happens when you have scheduled recordings via the Channels functionality and a recording is aired multiple time on the same or on various channels.
 ```
