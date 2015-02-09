@@ -1,5 +1,6 @@
 var https = require('https');
 var qs = require('querystring');
+var stdio = require('stdio');
 var name_list = [];
 
 var ops = stdio.getopt({
