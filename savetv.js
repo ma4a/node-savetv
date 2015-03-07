@@ -124,7 +124,7 @@ function download_recording(recording, callback){
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
                
 	            downloadUrl = obj.ARRVIDEOURL[2];
-	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
+	            var file_name = DOWNLOAD_DIR + path.delimiter + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
 				// add a check if the file already exists then most likely there are two recordings of the same show on save.tv
 				// and another thread is downloading the fist one. hence we skip downloading that file
 				if (!fs.existsSync(file_name)){
