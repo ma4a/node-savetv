@@ -12,6 +12,7 @@ pids
 *.dat
 *.db
 *.out
+*.cmd
 *.pid
 *.gz
 
