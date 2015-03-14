@@ -202,24 +202,6 @@ list_callback = function(res){
 
     });
 }
-
-logon_callback = function(res){
-
-    res.setEncoding('utf8');
- 	 
-    res.on('data', function(body){
-        if(body.indexOf('Login_Succeed') > -1){
-          console.log('Login to www.save.tv successful');
-          downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
-             = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
-	  var list_req = https.request(list_options, list_callback).end(); 
-    	} else {
-    		console.log('Login to www.save.tv failed');
-    	}
-    });
-
-}
-
 // create a queue to download recordings simultaneously and queue the rest. The number of
 // simultaneous recordings is specified with constant SIMULTANOUS_DOWNLOADS
 var queue = async.queue(download_recording, SIMULTANOUS_DOWNLOADS);
@@ -240,6 +222,24 @@ queue.drain = function(){
 		});
 
     }).end();
+}
+
+
+logon_callback = function(res){
+
+    res.setEncoding('utf8');
+ 	 
+    res.on('data', function(body){
+        if(body.indexOf('Login_Succeed') > -1){
+          console.log('Login to www.save.tv successful');
+          downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
+             = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
+	  var list_req = https.request(list_options, list_callback).end(); 
+    	} else {
+    		console.log('Login to www.save.tv failed');
+    	}
+    });
+
 }
 
 var logon_req = https.request(logon_options, logon_callback)
