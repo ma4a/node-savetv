@@ -134,16 +134,18 @@ logon_callback = function(res){
 }
 
 fs.readdir(CHECK_DIR, function(err, files){
-	for(var i = 0; i < files.length; i++){
-		var filename = files[i];
-	    if(filename.indexOf("mp4") > -1){ 
-			var fsplit = filename.split("-");
-			if(fsplit[1].indexOf("mp4") > -1)
-			    var subtitle = fsplit[1].split(".")[0].trim();
-			else
-				var subtitle = fsplit[2].split(".")[0].trim();
-		    var item = { title: fsplit[0].split("#")[0].trim(), subtitle: subtitle } ;	
-			name_list.push(item);
+	if(typeof files != "undefined" ){
+		for(var i = 0; i < files.length; i++){
+			var filename = files[i];
+			if(filename.indexOf("mp4") > -1){ 
+				var fsplit = filename.split("-");
+				if(fsplit[1].indexOf("mp4") > -1)
+					var subtitle = fsplit[1].split(".")[0].trim();
+				else
+					var subtitle = fsplit[2].split(".")[0].trim();
+				var item = { title: fsplit[0].split("#")[0].trim(), subtitle: subtitle } ;	
+				name_list.push(item);
+			}
 		}
 	}
 	var logon_req = https.request(logon_options, logon_callback)
