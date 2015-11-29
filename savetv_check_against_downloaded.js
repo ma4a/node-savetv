@@ -153,9 +153,18 @@ var walk_dir = function(dir, done){
 					 file = file[len-1];
 					 if(file.toUpperCase().indexOf("MP4") > -1){
 						var fname_split = file.split("-");
-						if(fname_split.length == 3){
-							var subtitle = fname_split[2].split(".")[0].trim();
+						if(fname_split.length === 2){
+							var subtitle = fname_split[1].split(".")[0].trim();
 							var item = { title: fname_split[0].split("#")[0].trim(), subtitle: subtitle } ;
+							results.push(item);							
+						}
+						if(fname_split.length === 3){
+							var subtitle = fname_split[2].split(".")[0].trim();
+							var actor = fname_split[1].trim();
+							var number = fname_split[0].split(" ")[1].replace("#","");
+							var year = fname_split[0].split(" ")[2];
+							var item = { title: fname_split[0].split("#")[0].trim(),
+							       number: number, year: year, actor: actor, subtitle: subtitle } ;
 							results.push(item);
 						}	
 					 }
@@ -172,7 +181,7 @@ var walk_dir = function(dir, done){
 walk_dir(CHECK_DIR,function(err, results){
 	
 	name_list = results;
-	console.log(name_list);
+	// console.log(name_list);
 	
     // logon to Savetv and start checking agains all programmed recordings
     // if the recording already exists on the local file system delete it from SaveTV	
