@@ -1,6 +1,6 @@
-var fs = require('fs')
+var fs = require('fs');
+var path = require('path');
 var CHECK_DIR = ".";
-var name_list = [];
 var https = require('https');
 var qs = require('querystring');
 
@@ -133,24 +133,58 @@ logon_callback = function(res){
     });
 }
 
-fs.readdir(CHECK_DIR, function(err, files){
-	if(typeof files != "undefined" ){
-		for(var i = 0; i < files.length; i++){
-			var filename = files[i];
-			if(filename.indexOf("mp4") > -1){ 
-				var fsplit = filename.split("-");
-				if(fsplit[1].indexOf("mp4") > -1)
-					var subtitle = fsplit[1].split(".")[0].trim();
-				else
-					var subtitle = fsplit[2].split(".")[0].trim();
-				var item = { title: fsplit[0].split("#")[0].trim(), subtitle: subtitle } ;	
-				name_list.push(item);
-			}
-		}
-	}
-	var logon_req = https.request(logon_options, logon_callback)
+var walk_dir = function(dir, done){
+	var results = [];
+	fs.readdir(dir, function(err, files){
+		if (err) return done(err);
+		var pending = files.length;
+		if (!pending) return done(null, results);
+		files.forEach(function(file){
+			file = path.resolve(dir, file);
+			fs.stat(file, function(err, stat){
+				 if (stat && stat.isDirectory()){ 
+					walk_dir(file, function(err, res) {
+						results = results.concat(res);
+						if (!--pending) done(null, results);
+					});
+				 } else {
+					 file = file.split("\\");
+					 var len = file.length;
+					 file = file[len-1];
+					 if(file.toUpperCase().indexOf("MP4") > -1){
+						var fname_split = file.split("-");
+						if(fname_split.length == 3){
+							var subtitle = fname_split[2].split(".")[0].trim();
+							var item = { title: fname_split[0].split("#")[0].trim(), subtitle: subtitle } ;
+							results.push(item);
+						}	
+					 }
+					 if (!--pending) done(null, results);
+				 }
+            
+			});
+		});
+	});
+};
+
+// Walk through the directory and subdirectories to find all files with an
+// ending of mp4
+walk_dir(CHECK_DIR,function(err, results){
+	
+	name_list = results;
+	console.log(name_list);
+	
+    // logon to Savetv and start checking agains all programmed recordings
+    // if the recording already exists on the local file system delete it from SaveTV	
+  	var logon_req = https.request(logon_options, logon_callback);
 	logon_req.write(post_data);
 	logon_req.end();
-	
 });
+
+
+
+
+
+
+
 
