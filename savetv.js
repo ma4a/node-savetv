@@ -6,7 +6,7 @@ var path = require('path');
 var exec = require('child_process').exec;
 var fs = require('fs');
 var Datastore = require('nedb'), db = new Datastore({
-	filename : './savetv.db', autoload : true}); 
+	filename : './savetv.db', autoload : true});
 
 /*
  * constants that need adjustment based on save.tv user
@@ -16,10 +16,10 @@ var DOWNLOAD_DIR = '.';   // directory to download the files to. directory has t
                                                 // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
-var ADDFREE = true;  // download the add free version of a file. if there is no add free version skip the download
-var RECORDING_FORMAT = 6 // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd 
+var ADDFREE = "1";  // download the add free version of a file. if there is no add free version skip the download
+var RECORDING_FORMAT = "6" // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd
 // parameters to be implement in the future
-// var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
+// var RECORDING_FORMATS = { 6 : 'HD', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 
 var stdio = require('stdio');
 var ops = stdio.getopt({
@@ -33,8 +33,7 @@ if(ops.downloadto)
 
 var post_data = qs.stringify({
 	 sUsername : ops.username,
-	 sPassword : ops.password,
-	 value : 'Login'
+	 sPassword : ops.password
 });
 
 var logon_options = {
@@ -84,7 +83,7 @@ var delete_options  = {
 
 function download_file_wget(file_url, file_name, callback) {
 
-	var wget_options = { 
+	var wget_options = {
 			encoding: 'binary',
 			maxBuffer: 5000*1024,
 	}
@@ -93,7 +92,7 @@ function download_file_wget(file_url, file_name, callback) {
     var wget = 'wget -c -O "' + file_name + '" ' + file_url;
 
     console.log('Downloading to %s from %s', file_name, file_url);
-    
+
     // excute wget using child_process' exec function
     exec(wget, { encoding: 'binary',
 			maxBuffer: 5000*1024 } ,function(err, stdout, stderr) {
@@ -107,12 +106,15 @@ function download_file_wget(file_url, file_name, callback) {
 
 function download_recording(recording, callback){
 
-    downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId=' 
+    // loop over all possible recording formats for this recodring. Find the Quality Recording with or without advertising
+    downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId='
          + recording.ITELECASTID + '&iFormat=' + RECORDING_FORMAT + '.0&bAdFree=' + ADDFREE;
+
+    
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){
-	
+
 		res.setEncoding('utf8');
 		var list = '';
 
@@ -124,28 +126,28 @@ function download_recording(recording, callback){
 
 	        var obj = JSON.parse(list);
 	        if (obj.ARRVIDEOURL[1] === 'OK'){
-               
+
 	            downloadUrl = obj.ARRVIDEOURL[2];
 	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
 				// add a check if the file already exists then most likely there are two recordings of the same show on save.tv
 				// and another thread is downloading the fist one. hence we skip downloading that file
 				if (!fs.existsSync(file_name)){
-				
+
 					download_file_wget(downloadUrl, file_name , function(err) {
 						if(err) console.log('An error occured during download ', err);
 						else {
 							db.insert(recording, function(err, newRecording){});
 
 							if(DEL_REC_AFTER_DOWNLOAD){
-								
+
 								delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
-								var delete_request = https.request(delete_options, function(res){ 
-									
+								var delete_request = https.request(delete_options, function(res){
+
 									  var body = '';
 
 									  res.on('data', function(chunk){
 										body += chunk;
-									  }) 
+									  })
 
 									  res.on('end', function(){
 										console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
@@ -182,9 +184,9 @@ list_callback = function(res){
 	 	var obj = JSON.parse(list);
 
     	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
-			  
+
 			  if(telecast.BISGROUP === false){
-			  
+
     		      var recording = telecast.STRTELECASTENTRY;
 
 	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
@@ -197,7 +199,7 @@ list_callback = function(res){
 		        	  	}
 	        	  });
 			   } else {
-			      console.log('Found subgrup with name %s.', telecast.STITLE); 
+			      console.log('Found subgrup with name %s.', telecast.STITLE);
 			   }
         });
 
@@ -210,7 +212,7 @@ var queue = async.queue(download_recording, SIMULTANOUS_DOWNLOADS);
 queue.drain = function(){
     // log out of the website
     var logout_req = https.request(logout_options, function(res){
-    
+
 		res.setEncoding('utf8');
 		var list = '';
 
@@ -229,13 +231,13 @@ queue.drain = function(){
 logon_callback = function(res){
 
     res.setEncoding('utf8');
- 	 
+
     res.on('data', function(body){
         if(body.indexOf('Login_Succeed') > -1){
           console.log('Login to www.save.tv successful');
-          downloadUrl_options.headers.Cookie = list_options.headers.Cookie 
+          downloadUrl_options.headers.Cookie = list_options.headers.Cookie
              = logout_options.headers.Cookie = delete_options.headers.Cookie = res.headers['set-cookie'][0].split(';')[0];
-	  var list_req = https.request(list_options, list_callback).end(); 
+	  var list_req = https.request(list_options, list_callback).end();
     	} else {
     		console.log('Login to www.save.tv failed');
     	}
@@ -246,4 +248,3 @@ logon_callback = function(res){
 var logon_req = https.request(logon_options, logon_callback)
 logon_req.write(post_data);
 logon_req.end();
-
