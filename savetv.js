@@ -102,8 +102,6 @@ function download_file_wget(file_url, file_name, callback) {
     });
 };
 
-
-
 function download_recording(recording, callback){
 
     // loop over all possible recording formats for this recodring. Find the Quality Recording with or without advertising
@@ -129,6 +127,7 @@ function download_recording(recording, callback){
 
 	            downloadUrl = obj.ARRVIDEOURL[2];
 	            var file_name = DOWNLOAD_DIR + recording.STITLE + ' - ' + recording.SSUBTITLE + '.mp4';
+				
 				// add a check if the file already exists then most likely there are two recordings of the same show on save.tv
 				// and another thread is downloading the fist one. hence we skip downloading that file
 				if (!fs.existsSync(file_name)){
@@ -158,6 +157,8 @@ function download_recording(recording, callback){
 						}
 					    callback();
 					});
+				} else {
+				  console.log("Download stopped, the file " + file_name + " already exists.");	
 				}
 
 	        } else {
