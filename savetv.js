@@ -16,10 +16,6 @@ var DOWNLOAD_DIR = '.';   // directory to download the files to. directory has t
                                                 // as otherwies the script will break
 var SIMULTANOUS_DOWNLOADS = 3;  // number of simultanous downloads
 var DEL_REC_AFTER_DOWNLOAD = true; // should the script delete the video on save.tv after successfull download
-var ADDFREE = "1";  // download the add free version of a file. if there is no add free version skip the download
-var RECORDING_FORMAT = "6" // select the recording format to download. Current options 4 = mobile, 5 = h.264 sd, 6 = h.264 hd
-// parameters to be implement in the future
-// var RECORDING_FORMATS = { 6 : 'HD', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 
 var stdio = require('stdio');
 var ops = stdio.getopt({
@@ -104,11 +100,21 @@ function download_file_wget(file_url, file_name, callback) {
 
 function download_recording(recording, callback){
 
+    var download_format = 0;
+    var add_free = false;
+
+    // find the best quality recording avaiable that also has adds removed
+    recording.ARRALLOWDDOWNLOADFORMATS.forEach(function(recordedformat){
+        if(recordedformat.RECORDINGFORMATID >= download_format){
+            download_format = recordedformat.RECORDINGFORMATID;
+            if(add_free != recordedformat.BADCUTENABLED)
+               add_free = recordedformat.BADCUTENABLED;
+        }
+    });
+    
     // loop over all possible recording formats for this recodring. Find the Quality Recording with or without advertising
     downloadUrl_options.path = downloadUrl_options.path_base + '?TelecastId='
-         + recording.ITELECASTID + '&iFormat=' + RECORDING_FORMAT + '.0&bAdFree=' + ADDFREE;
-
-    
+         + recording.ITELECASTID + '&iFormat=' + download_format + '&bAdFree=' + add_free;
 
 	// get the download url for the recording
 	var downloadUrl_req = https.request(downloadUrl_options, function(res){

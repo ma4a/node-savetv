@@ -4,8 +4,6 @@ var CHECK_DIR = ".";
 var https = require('https');
 var qs = require('querystring');
 
-// parameters to be implement in the future
-// var RECORDING_FORMATS = { 6 : 'HD (BETA)', 5: 'H.264 High Quality', 4 : 'H.264 Mobile'];
 var stdio = require('stdio');
 var ops = stdio.getopt({
 	'username': {key: 'u', args: 1, mandatory: true, description: 'save.tv username'},
