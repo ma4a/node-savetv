@@ -98,6 +98,41 @@ function download_file_wget(file_url, file_name, callback) {
     });
 };
 
+function logout(){
+        // log out of the website
+    var logout_req = https.request(logout_options, function(res){
+
+        res.setEncoding('utf8');
+        var list = '';
+
+        res.on('data', function(chunk){
+            list += chunk;
+        })
+
+        res.on('end', function(){
+                console.log('Logged out of www.save.tv', list);
+        });
+
+    }).end();
+}
+
+function delete_recording_onsavetv(telecastid, callback){
+    
+    delete_options.path =  delete_options.path_base + '?TelecastID=' + telecastid;
+    var delete_request = https.request(delete_options, function(res){
+        var body = '';
+
+        res.on('data', function(chunk){
+            body += chunk;
+        })
+
+        res.on('end', function(){
+            console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
+        });
+
+    }).end();
+}
+
 function download_recording(recording, callback){
 
     var download_format = 0;
@@ -144,21 +179,9 @@ function download_recording(recording, callback){
 							db.insert(recording, function(err, newRecording){});
 
 							if(DEL_REC_AFTER_DOWNLOAD){
-
-								delete_options.path =  delete_options.path_base + '?TelecastID=' + recording.ITELECASTID;
-								var delete_request = https.request(delete_options, function(res){
-
-									  var body = '';
-
-									  res.on('data', function(chunk){
-										body += chunk;
-									  })
-
-									  res.on('end', function(){
-										console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
-									  });
-
-								}).end();
+                                delete_recording_onsavetv(recording.ITELECASTID, function(err){
+                                    if(err) console.log('An error occured while deleting recording on save.tv ', err);
+                                });
 							}
 						}
 					    callback();
@@ -189,51 +212,51 @@ list_callback = function(res){
     res.on('end', function(){
 
 	 	var obj = JSON.parse(list);
+         
+        if(obj.ARRVIDEOARCHIVEENTRIES.length != 0){ 
 
-    	obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
+            obj.ARRVIDEOARCHIVEENTRIES.forEach(function(telecast){
 
-			  if(telecast.BISGROUP === false){
+                if(telecast.BISGROUP === false){
 
-    		      var recording = telecast.STRTELECASTENTRY;
+                    var recording = telecast.STRTELECASTENTRY;
 
-	        	  db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
-		        	  	if (doc === null){
-		        	  		// push the recording into the download queue
-	                        queue.push(recording);
-		        	  		console.log('Found new recording - %s - %s', recording.STITLE, recording.SSUBTITLE);
-		        	  	} else {
-		        	  		console.log('Recording - %s - %s already downloaded', recording.STITLE, recording.SSUBTITLE);
-		        	  	}
-	        	  });
-			   } else {
-			      console.log('Found subgrup with name %s.', telecast.STITLE);
-			   }
-        });
+                    db.findOne({ ITELECASTID : recording.ITELECASTID }, function(err, doc){
+                            if (doc === null){
+                                // push the recording into the download queue
+                                queue.push(recording);
+                                console.log('Found new recording - %s - %s', recording.STITLE, recording.SSUBTITLE);
+                            } else {
+                            if(DEL_REC_AFTER_DOWNLOAD){  
+                                console.log('Recording - %s - %s already downloaded, deleting it on save.tv', recording.STITLE, recording.SSUBTITLE);
+                                delete_recording_onsavetv(recording.ITELECASTID, function(err){
+                                    if(err) console.log('An error occured while deleting recording on save.tv ', err);
+                                });
+                            } else {
+                                console.log('Recording - %s - %s already downloaded, doing nothing', recording.STITLE, recording.SSUBTITLE);
+                            }
+                            }
+                    });
+                } else {
+                    console.log('Found subgrup with name %s.', telecast.STITLE);
+                }
+            });
+       } else {
+           console.log('Your save.tv account has no recordings to download.');
+           logout();
+       }
 
     });
 }
+
 // create a queue to download recordings simultaneously and queue the rest. The number of
 // simultaneous recordings is specified with constant SIMULTANOUS_DOWNLOADS
 var queue = async.queue(download_recording, SIMULTANOUS_DOWNLOADS);
 
+// once the queu is drained from all recordings to download logout from save.tv
 queue.drain = function(){
-    // log out of the website
-    var logout_req = https.request(logout_options, function(res){
-
-		res.setEncoding('utf8');
-		var list = '';
-
-		res.on('data', function(chunk){
-            list += chunk;
-		})
-
-		res.on('end', function(){
-             console.log('Logged out of www.save.tv', list);
-		});
-
-    }).end();
+  logout();
 }
-
 
 logon_callback = function(res){
 
