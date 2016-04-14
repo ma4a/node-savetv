@@ -116,7 +116,7 @@ function logout(){
     }).end();
 }
 
-function delete_recording_onsavetv(telecastid, callback){
+function delete_recording_onsavetv(telecastid, title, subtitle, callback){
     
     delete_options.path =  delete_options.path_base + '?TelecastID=' + telecastid;
     var delete_request = https.request(delete_options, function(res){
@@ -127,7 +127,7 @@ function delete_recording_onsavetv(telecastid, callback){
         })
 
         res.on('end', function(){
-            console.log('Deleted recording - %s - %s on www.save.tv', recording.STITLE, recording.SSUBTITLE);
+            console.log('Deleted recording - %s - %s on www.save.tv', title, subtitle);
         });
 
     }).end();
@@ -179,7 +179,7 @@ function download_recording(recording, callback){
 							db.insert(recording, function(err, newRecording){});
 
 							if(DEL_REC_AFTER_DOWNLOAD){
-                                delete_recording_onsavetv(recording.ITELECASTID, function(err){
+                                delete_recording_onsavetv(recording.ITELECASTID, recording.STITLE, recording.SSUBTITLE, function(err){
                                     if(err) console.log('An error occured while deleting recording on save.tv ', err);
                                 });
 							}
@@ -229,7 +229,7 @@ list_callback = function(res){
                             } else {
                             if(DEL_REC_AFTER_DOWNLOAD){  
                                 console.log('Recording - %s - %s already downloaded, deleting it on save.tv', recording.STITLE, recording.SSUBTITLE);
-                                delete_recording_onsavetv(recording.ITELECASTID, function(err){
+                                delete_recording_onsavetv(recording.ITELECASTID, recording.STITLE, recording.SSUBTITLE, function(err){
                                     if(err) console.log('An error occured while deleting recording on save.tv ', err);
                                 });
                             } else {
