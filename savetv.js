@@ -206,6 +206,7 @@ list_callback = function(res){
 	res.setEncoding('utf8');
 
 	res.on('data', function(chunk){
+		if (!/DOCTYPE/i.test(chunk))
     	list += chunk;
 	});
 
